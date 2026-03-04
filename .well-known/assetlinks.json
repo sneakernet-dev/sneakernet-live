@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.sneakernet",
+    "sha256_cert_fingerprints": ["25:2F:ED:7C:BE:7F:B5:F0:CF:2F:78:B8:D4:25:6C:AD:07:44:E9:99:18:E0:E3:57:A4:62:7E:7A:67:A3:1A:E8"]
+  }
+}]
