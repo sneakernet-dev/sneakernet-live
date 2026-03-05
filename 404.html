@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SneakerNet</title>
+<script>
+// Redirect /apply/<b64> paths to the apply handler
+(function(){
+  var path = window.location.pathname;
+  if (/^\/apply\/[A-Za-z0-9_-]+/.test(path)) {
+    // GitHub Pages 404 for dynamic paths — redirect to apply/index.html
+    // Pass the b64 payload via hash so the handler can read it
+    var b64 = path.replace(/^\/apply\//, '').split('/')[0].split('?')[0];
+    window.location.replace('/apply/#' + b64);
+  }
+})();
+</script>
+</head>
+<body style="font-family:sans-serif;background:#111;color:#eee;text-align:center;padding:60px">
+<h1>SneakerNet</h1>
+<p>Page not found.</p>
+<p><a href="/" style="color:#5af">Go home</a></p>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SneakerNet — Open Packet</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,sans-serif;background:#111;color:#eee;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{max-width:420px;width:100%;background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:32px 24px;text-align:center}
+h1{font-size:20px;margin-bottom:8px;color:#fff}
+.sub{color:#888;font-size:14px;margin-bottom:24px}
+.status{padding:12px;border-radius:8px;margin-bottom:16px;font-size:14px}
+.trying{background:#1a2a1a;color:#6c6;border:1px solid #363}
+.failed{background:#2a1a1a;color:#c66;border:1px solid #633}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:10px;text-decoration:none;color:#fff}
+.btn-primary{background:#2563eb}
+.btn-primary:hover{background:#1d4ed8}
+.btn-secondary{background:#333;border:1px solid #555}
+.btn-secondary:hover{background:#444}
+.payload-box{background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:12px;margin-top:16px;text-align:left;max-height:120px;overflow:auto;font-family:monospace;font-size:11px;color:#888;word-break:break-all;display:none}
+.or{color:#555;font-size:12px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>SneakerNet</h1>
+  <p class="sub">Opening packet in app...</p>
+  <div id="status" class="status trying">Attempting to open SneakerNet...</div>
+  <div id="actions" style="display:none">
+    <a id="intentLink" class="btn btn-primary" href="#">Open in SneakerNet</a>
+    <p class="or">or</p>
+    <button class="btn btn-secondary" onclick="copyPayload()">Copy JSON to clipboard</button>
+    <p class="or">then share it to SneakerNet via Android share sheet</p>
+    <a class="btn btn-secondary" href="https://sneakernet.live/downloads/SneakerNet-latest.apk">Download SneakerNet APK</a>
+  </div>
+  <div id="payloadBox" class="payload-box"></div>
+</div>
+<script>
+(function(){
+  // Extract base64url payload from URL path or hash
+  // Path format: /apply/<b64> (direct)
+  // Hash format: /apply/#<b64> (via 404.html redirect on GitHub Pages)
+  var path = window.location.pathname;
+  var hash = window.location.hash;
+  var b64 = '';
+  var match = path.match(/\/apply\/([A-Za-z0-9_-]+)/);
+  if (match) {
+    b64 = match[1];
+  } else if (hash && /^#[A-Za-z0-9_-]+/.test(hash)) {
+    b64 = hash.substring(1);
+  }
+  if (!b64) {
+    document.getElementById('status').className = 'status failed';
+    document.getElementById('status').textContent = 'No packet data found in URL.';
+    return;
+  }
+
+  // Try intent:// URI first — works in Chrome without App Link verification
+  var intentUri = 'intent://apply/' + b64 + '#Intent;scheme=snp;package=app.sneakernet;end';
+
+  // Build fallback snp:// URI
+  var snpUri = 'snp://apply/' + b64;
+
+  // Decode payload for copy fallback
+  var json = '';
+  try {
+    var std = b64.replace(/-/g, '+').replace(/_/g, '/');
+    while (std.length % 4) std += '=';
+    json = decodeURIComponent(escape(atob(std)));
+    // Validate it's JSON
+    JSON.parse(json);
+  } catch(e) {
+    json = '';
+  }
+
+  // Attempt to open via intent:// (most reliable for Chrome on Android)
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  var isChrome = /Chrome/i.test(navigator.userAgent);
+
+  if (isAndroid) {
+    // Try intent:// which Chrome handles natively
+    window.location.href = intentUri;
+  } else {
+    // Desktop or iOS — try snp:// custom scheme
+    window.location.href = snpUri;
+  }
+
+  // After a delay, assume the redirect didn't work and show manual options
+  setTimeout(function(){
+    document.getElementById('status').className = 'status failed';
+    document.getElementById('status').textContent = 'Could not open automatically. Use the options below:';
+    document.getElementById('actions').style.display = 'block';
+    document.getElementById('intentLink').href = isAndroid ? intentUri : snpUri;
+    if (json) {
+      document.getElementById('payloadBox').style.display = 'block';
+      document.getElementById('payloadBox').textContent = json.substring(0, 2000) + (json.length > 2000 ? '...' : '');
+    }
+  }, 1500);
+
+  window.copyPayload = function(){
+    if (!json) { alert('No payload to copy'); return; }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(json).then(function(){
+        alert('JSON copied! Open SneakerNet and use Import, or share the text to SneakerNet.');
+      });
+    } else {
+      // Fallback for older browsers
+      var ta = document.createElement('textarea');
+      ta.value = json;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      alert('JSON copied!');
+    }
+  };
+})();
+</script>
+</body>
+</html>
