@@ -1,1 +1,419 @@
-﻿coming soon
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SneakerNet — Portable AI context persistence</title>
+<meta name="description" content="Carry your AI conversation history across any AI, any platform, any session. No cloud. No accounts. No servers. Just a file.">
+<meta name="theme-color" content="#0b0b0e">
+<meta property="og:title" content="SneakerNet">
+<meta property="og:description" content="Portable AI context persistence. Carry your conversation history across any AI, any platform, any session.">
+<meta property="og:type" content="website">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0b0b0e;
+  --bg-card:#15151a;
+  --bg-card-2:#1c1c22;
+  --border:#2a2a33;
+  --border-bright:#3a3a45;
+  --text:#ededf0;
+  --text-dim:#9a9aa5;
+  --text-dimmer:#666670;
+  --accent:#5b8cff;
+  --accent-hover:#7aa0ff;
+  --accent-glow:rgba(91,140,255,0.18);
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  min-height:100vh;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.wrap{max-width:780px;margin:0 auto;padding:56px 24px 80px}
+@media (max-width:600px){.wrap{padding:40px 20px 60px}}
+
+/* Hero */
+.hero{margin-bottom:56px}
+.brand{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--text-dim);
+  padding:6px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  margin-bottom:28px;
+}
+.brand .dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 10px var(--accent-glow);
+}
+h1{
+  font-size:clamp(36px,6vw,56px);
+  font-weight:700;
+  letter-spacing:-0.03em;
+  line-height:1.05;
+  margin-bottom:20px;
+  background:linear-gradient(180deg,#fff 0%,#b8b8c5 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.tag{
+  font-size:clamp(17px,2.4vw,20px);
+  color:var(--text-dim);
+  max-width:620px;
+  margin-bottom:20px;
+}
+.tag strong{color:var(--text)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{
+  font-family:var(--mono);
+  font-size:11px;
+  padding:4px 10px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  color:var(--text-dimmer);
+  background:var(--bg-card);
+}
+.chip strong{color:var(--text-dim);font-weight:normal}
+
+/* Section heading */
+h2{
+  font-size:13px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  color:var(--text-dimmer);
+  margin:56px 0 20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+h2::after{
+  content:"";flex:1;height:1px;background:var(--border);
+}
+
+/* Run it — primary action cards */
+.run{display:grid;grid-template-columns:1fr;gap:14px}
+.run-card{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:22px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color 0.15s,background 0.15s,transform 0.15s;
+  position:relative;
+}
+.run-card:hover{
+  border-color:var(--border-bright);
+  background:var(--bg-card-2);
+  transform:translateY(-1px);
+}
+.run-card.primary{
+  border-color:var(--accent);
+  background:linear-gradient(135deg,rgba(91,140,255,0.08),rgba(91,140,255,0.02));
+}
+.run-card.primary:hover{
+  border-color:var(--accent-hover);
+  background:linear-gradient(135deg,rgba(91,140,255,0.14),rgba(91,140,255,0.04));
+}
+.run-card .icon{
+  flex-shrink:0;
+  width:44px;height:44px;
+  border-radius:10px;
+  background:var(--bg-card-2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+}
+.run-card.primary .icon{
+  background:var(--accent-glow);
+  border-color:var(--accent);
+  color:var(--accent-hover);
+}
+.run-card .body{flex:1;min-width:0}
+.run-card .title{
+  font-size:16px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.run-card .sub{
+  font-size:13px;
+  color:var(--text-dim);
+  line-height:1.4;
+}
+.run-card .arrow{
+  flex-shrink:0;
+  color:var(--text-dimmer);
+  font-size:18px;
+  transition:transform 0.15s,color 0.15s;
+}
+.run-card:hover .arrow{
+  transform:translateX(2px);
+  color:var(--accent);
+}
+
+/* Android details — collapsible */
+details.setup{
+  margin-top:16px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:0;
+  overflow:hidden;
+}
+details.setup summary{
+  padding:16px 22px;
+  cursor:pointer;
+  font-size:14px;
+  color:var(--text-dim);
+  font-weight:500;
+  list-style:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+details.setup summary::-webkit-details-marker{display:none}
+details.setup summary::after{
+  content:"+";
+  color:var(--text-dimmer);
+  font-size:18px;
+  transition:transform 0.15s;
+}
+details.setup[open] summary::after{transform:rotate(45deg)}
+details.setup .inner{
+  padding:4px 22px 22px;
+  border-top:1px solid var(--border);
+  margin-top:0;
+  font-size:14px;
+  color:var(--text-dim);
+  line-height:1.6;
+}
+details.setup .inner ol{padding-left:20px;margin:12px 0}
+details.setup .inner li{margin-bottom:8px}
+details.setup .inner code{
+  font-family:var(--mono);
+  font-size:12px;
+  background:var(--bg);
+  padding:2px 6px;
+  border-radius:4px;
+  color:var(--text);
+}
+details.setup .inner strong{color:var(--text)}
+
+/* What it is — prose */
+.prose{
+  font-size:15.5px;
+  color:var(--text-dim);
+  line-height:1.65;
+}
+.prose p{margin-bottom:14px}
+.prose p:last-child{margin-bottom:0}
+.prose strong{color:var(--text)}
+.prose em{color:var(--text);font-style:normal}
+
+/* Docs grid */
+.docs{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+@media (max-width:560px){.docs{grid-template-columns:1fr}}
+.doc-card{
+  padding:18px 20px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  text-decoration:none;
+  color:inherit;
+  transition:border-color 0.15s,background 0.15s;
+}
+.doc-card:hover{
+  border-color:var(--border-bright);
+  background:var(--bg-card-2);
+}
+.doc-card .name{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--accent);
+  margin-bottom:6px;
+  letter-spacing:0.02em;
+}
+.doc-card .title{
+  font-size:15px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.doc-card .sub{
+  font-size:12.5px;
+  color:var(--text-dim);
+  line-height:1.4;
+}
+
+/* Callout */
+.callout{
+  margin-top:32px;
+  padding:20px 24px;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-left:2px solid var(--accent);
+  border-radius:8px;
+  font-size:14px;
+  color:var(--text-dim);
+  line-height:1.6;
+}
+.callout strong{color:var(--text)}
+.callout a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(91,140,255,0.3)}
+.callout a:hover{border-bottom-color:var(--accent)}
+
+/* Footer */
+footer{
+  margin-top:80px;
+  padding-top:28px;
+  border-top:1px solid var(--border);
+  font-size:12px;
+  color:var(--text-dimmer);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+footer .ver{font-family:var(--mono)}
+footer a{color:var(--text-dim);text-decoration:none}
+footer a:hover{color:var(--accent)}
+
+/* Selection */
+::selection{background:var(--accent-glow);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section class="hero">
+    <div class="brand"><span class="dot"></span>SneakerNet</div>
+    <h1>Your AI context, in a file.</h1>
+    <p class="tag">Every new AI conversation starts from zero. You re-introduce yourself, re-explain your project, re-establish your preferences. SneakerNet is a single JSON file you carry between sessions that tells any AI who you are, what you've worked on, and how you like to work — then grows as you go. <strong>No cloud. No accounts. No servers. Just a file.</strong></p>
+    <div class="chips">
+      <span class="chip"><strong>Protocol</strong> v1.3.0</span>
+      <span class="chip"><strong>Editor</strong> v1.3.65</span>
+      <span class="chip"><strong>Status</strong> Release</span>
+    </div>
+  </section>
+
+  <h2>Run it</h2>
+  <div class="run">
+
+    <a class="run-card primary" href="./sneakernet.html">
+      <div class="icon">▶</div>
+      <div class="body">
+        <div class="title">Open the Editor in your browser</div>
+        <div class="sub">Runs directly in any modern browser. No install. All data stays in your device's local storage.</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="run-card" href="./sneakernet.html" download="sneakernet.html">
+      <div class="icon">⬇</div>
+      <div class="body">
+        <div class="title">Download the Editor as a single HTML file</div>
+        <div class="sub">Save it anywhere and open with a double-click. Works fully offline. One file, no dependencies.</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+    <a class="run-card" href="./downloads/SneakerNet-latest.apk">
+      <div class="icon">📱</div>
+      <div class="body">
+        <div class="title">Install the Android app</div>
+        <div class="sub">Signed APK. Registers <code style="font-family:var(--mono);font-size:12px">snp://</code> deep links so AIs can hand off bundles with one tap. Setup steps below.</div>
+      </div>
+      <div class="arrow">→</div>
+    </a>
+
+  </div>
+
+  <details class="setup">
+    <summary>Android setup — first time sideloading</summary>
+    <div class="inner">
+      <p>Google Play submission is in preparation; until then the Android app installs as a sideload. It's safe — you're downloading a signed APK from the same domain you're reading this page on.</p>
+      <ol>
+        <li>Tap <strong>Install the Android app</strong> above. Your browser downloads <code>SneakerNet-latest.apk</code> to your Downloads folder.</li>
+        <li>Open the notification, or open your file manager and tap the APK.</li>
+        <li>Android will prompt: <em>"For your security, your phone currently isn't allowed to install unknown apps from this source."</em> Tap <strong>Settings</strong>, then toggle <strong>Allow from this source</strong> on for your browser (usually Chrome).</li>
+        <li>Back out, tap the APK again, then <strong>Install</strong>. Takes a few seconds.</li>
+        <li>Open the app. The first launch asks for storage permission so the Editor can read and write <code>.snp</code> files.</li>
+      </ol>
+      <p>That's it. The app registers <code>https://sneakernet.live/apply/</code> as a verified App Link, so deep links from AI chats open directly in the app with no browser chooser.</p>
+    </div>
+  </details>
+
+  <h2>What it is</h2>
+  <div class="prose">
+    <p>SneakerNet is a <strong>portable AI context protocol</strong>. A <em>Packet</em> is a JSON file that holds your profile, conversation history index, behavioral rules, and the registry of every AI you've worked with. You give it to an AI at the start of a session; the AI reads it, self-registers if it's new, and works with the full context. At the end, the AI hands back an <em>Update Packet</em> — a diff of what just happened. The Editor applies it, bumps the version, and your context grows.</p>
+    <p>The wire format is <strong>JSON</strong>, the compression is <strong>gzip</strong>, and deep links use a custom <code style="font-family:var(--mono);font-size:13px">snp://</code> scheme with an HTTPS App Link fallback. Everything stays on your device unless you hand it to an AI yourself.</p>
+    <p>The protocol is stable. Any AI that can read JSON and produce a bundle can participate — no SDKs, no accounts, no gatekeepers.</p>
+  </div>
+
+  <h2>Documentation</h2>
+  <div class="docs">
+
+    <a class="doc-card" href="./readme.html">
+      <div class="name">README</div>
+      <div class="title">Overview &amp; feature tour</div>
+      <div class="sub">High-level walkthrough of the Editor, the two Packet types, compression, encryption, and platforms.</div>
+    </a>
+
+    <a class="doc-card" href="./protocol.html">
+      <div class="name">PROTOCOL</div>
+      <div class="title">Formal specification</div>
+      <div class="sub">The normative protocol spec — packet structure, bundle format, SNP envelope, file types, conformance requirements.</div>
+    </a>
+
+    <a class="doc-card" href="./ai-reference.html">
+      <div class="name">AI_REFERENCE</div>
+      <div class="title">Onboarding guide for AIs</div>
+      <div class="sub">What an AI needs to know to read a Packet, produce a conformant bundle, and avoid the most common mistakes.</div>
+    </a>
+
+    <a class="doc-card" href="./conformance.html">
+      <div class="name">CONFORMANCE</div>
+      <div class="title">Pre-flight checklist</div>
+      <div class="sub">A checklist AIs can self-run before outputting a bundle. Covers structure, attribution, protected paths, deep links.</div>
+    </a>
+
+  </div>
+
+  <div class="callout">
+    <strong>Want it on iOS?</strong> The Editor runs on any iOS browser today — it's a single HTML file, so Safari or Chrome on iPhone/iPad works. A native iOS app with the same deep-link handoff story as the Android app is on the roadmap but needs a TestFlight volunteer. If you'd like to help sponsor or test an iOS build, <a href="https://github.com/sneakernet-dev/sneakernet-live/discussions/new?category=general&amp;title=iOS+build+interest">start a discussion</a>.
+  </div>
+
+  <footer>
+    <span class="ver">sneakernet.live · protocol v1.3.0 · editor v1.3.65</span>
+    <span>
+      <a href="https://github.com/sneakernet-dev/sneakernet-live">github</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/sneakernet-dev/sneakernet-live/discussions">discussions</a>
+      &nbsp;·&nbsp;
+      <a href="https://github.com/sneakernet-dev/sneakernet-live/issues">issues</a>
+    </span>
+  </footer>
+
+</div>
+</body>
+</html>
